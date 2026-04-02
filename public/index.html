@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Çalışan Memnuniyet Anketi 2025</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --purple: #6B5CE7;
+    --purple-light: #EDE9FF;
+    --purple-mid: #8B7CF8;
+    --teal: #00C9A7;
+    --teal-light: #E0FBF5;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --card: #FFFFFF;
+    --bg: #F6F5FF;
+    --success: #10B981;
+    --star-on: #F59E0B;
+    --star-off: #E5E7EB;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #6B5CE7 0%, #9B8DFF 100%);
+    padding: 2rem 1.25rem 3.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0; right: 0;
+    height: 40px;
+    background: var(--bg);
+    border-radius: 40px 40px 0 0;
+  }
+  .header-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 26px;
+  }
+  .header h1 { color: #fff; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .header p  { color: rgba(255,255,255,0.82); font-size: 0.88rem; line-height: 1.5; }
+
+  /* PROGRESS */
+  .progress-wrap { padding: 1.25rem 1.25rem 0; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #6B5CE7, #00C9A7); border-radius: 99px; transition: width 0.4s ease; }
+
+  /* SCREENS */
+  .screen { display: none; padding: 1rem 1.25rem; }
+  .screen.active { display: block; }
+
+  /* CATEGORY BADGE */
+  .category-badge {
+    display: inline-block;
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 1.5rem 1.25rem;
+    box-shadow: 0 2px 16px rgba(107,92,231,0.08);
+    margin-bottom: 1rem;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.4rem; }
+  .q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.5; color: var(--text); margin-bottom: 1.5rem; }
+
+  /* STARS */
+  .star-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; }
+  .star-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 36px; transition: transform 0.15s ease;
+    line-height: 1;
+    filter: grayscale(1) opacity(0.35);
+  }
+  .star-btn.active { filter: none; transform: scale(1.15); }
+  .star-btn:active { transform: scale(0.92); }
+
+  .star-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); padding: 0 4px; }
+
+  /* NAV BUTTONS */
+  .nav-row { display: flex; gap: 10px; margin-top: 0.5rem; }
+  .btn-back {
+    flex: 0 0 auto;
+    background: var(--card);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 0.85rem 1.25rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn-next {
+    flex: 1;
+    background: linear-gradient(135deg, #6B5CE7, #9B8DFF);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.2s;
+  }
+  .btn-next.ready { opacity: 1; }
+  .btn-next:active { opacity: 0.85; }
+
+  /* WELCOME */
+  .welcome-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 2px 16px rgba(107,92,231,0.08);
+    text-align: center;
+  }
+  .welcome-card .emoji { font-size: 3rem; margin-bottom: 1rem; }
+  .welcome-card h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .welcome-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+  .info-row { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+  .info-pill {
+    flex: 1; background: var(--purple-light); border-radius: 12px;
+    padding: 0.75rem 0.5rem; text-align: center;
+  }
+  .info-pill .val { font-size: 1.1rem; font-weight: 700; color: var(--purple); }
+  .info-pill .lbl { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .btn-start {
+    width: 100%;
+    background: linear-gradient(135deg, #6B5CE7, #9B8DFF);
+    color: #fff; border: none; border-radius: 14px;
+    padding: 1rem; font-size: 1rem; font-weight: 700; cursor: pointer;
+  }
+
+  /* ALREADY DONE */
+  .done-banner {
+    background: #FFF7ED; border: 1.5px solid #FDE68A;
+    border-radius: 16px; padding: 1.25rem;
+    text-align: center; margin-bottom: 1rem;
+  }
+  .done-banner .emoji { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .done-banner h3 { font-size: 1rem; font-weight: 600; color: #92400E; }
+  .done-banner p  { font-size: 0.85rem; color: #B45309; margin-top: 0.3rem; }
+
+  /* THANK YOU */
+  .thankyou-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(107,92,231,0.12);
+    animation: fadeUp 0.4s ease;
+  }
+  .checkmark {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, #00C9A7, #6B5CE7);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 2rem;
+  }
+  .thankyou-card h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .thankyou-card p  { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+  .score-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .chip {
+    background: var(--purple-light); color: var(--purple);
+    font-size: 0.75rem; font-weight: 600;
+    padding: 4px 12px; border-radius: 99px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">📋</div>
+  <h1>Çalışan Değer Önermesi</h1>
+  <p>Görüşleriniz kurumumuzun geleceğini şekillendiriyor.</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progressWrap" style="display:none">
+  <div class="progress-label">
+    <span id="progressText">Soru 1 / 20</span>
+    <span id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<!-- WELCOME SCREEN -->
+<div class="screen active" id="screenWelcome">
+  <div style="padding-top:1rem">
+    <div class="welcome-card" id="welcomeCard">
+      <div class="emoji">👋</div>
+      <h2>Merhaba!</h2>
+      <p>Bu anket <strong>tamamen anonimdir</strong>. Yanıtlarınız cihazınıza göre yalnızca <strong>bir kez</strong> alınmaktadır.</p>
+      <div class="info-row">
+        <div class="info-pill">
+          <div class="val">20</div>
+          <div class="lbl">Soru</div>
+        </div>
+        <div class="info-pill">
+          <div class="val">~3 dk</div>
+          <div class="lbl">Süre</div>
+        </div>
+        <div class="info-pill">
+          <div class="val">⭐ 1-5</div>
+          <div class="lbl">Puan</div>
+        </div>
+      </div>
+      <button class="btn-start" onclick="startSurvey()">Ankete Başla →</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION SCREEN -->
+<div class="screen" id="screenQuestion">
+  <div class="question-card">
+    <div class="category-badge" id="qCategory"></div>
+    <div class="q-number" id="qNumber"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="star-row" id="starRow"></div>
+    <div class="star-labels">
+      <span>Kesinlikle katılmıyorum</span>
+      <span>Kesinlikle katılıyorum</span>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn-back" id="btnBack" onclick="prevQuestion()">← Geri</button>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">İleri →</button>
+  </div>
+</div>
+
+<!-- THANK YOU SCREEN -->
+<div class="screen" id="screenDone">
+  <div style="padding-top:1rem">
+    <div class="thankyou-card">
+      <div class="checkmark">✓</div>
+      <h2>Teşekkürler!</h2>
+      <p>Yanıtlarınız başarıyla kaydedildi. Değerli geri bildiriminiz için teşekkür ederiz.</p>
+      <div class="score-chips" id="doneChips"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { id:1,  cat:'Takdir & Değer',    text:'Takdir edildiğimi hissediyorum' },
+  { id:2,  cat:'Takdir & Değer',    text:'Hatalar başkalarının yanında söylenmez' },
+  { id:3,  cat:'Adalet & Eşitlik',  text:'Politika ve prosedürler eşit uygulanır' },
+  { id:4,  cat:'Takdir & Değer',    text:'Kendimi değerli hissediyorum' },
+  { id:5,  cat:'Adalet & Eşitlik',  text:'Ödül ve terfiler adildir' },
+  { id:6,  cat:'İş Tatmini',        text:'İşimden keyif alıyorum' },
+  { id:7,  cat:'Gelişim & Kariyer', text:'Bilgi ve beceriler aktarılıyor' },
+  { id:8,  cat:'Gelişim & Kariyer', text:'Yükselme imkanı vardır' },
+  { id:9,  cat:'Gelişim & Kariyer', text:'Terfiler başarıya göre yapılır' },
+  { id:10, cat:'İş Ortamı',         text:'Takım çalışması etkilidir' },
+  { id:11, cat:'İletişim',          text:'Sorunlar rahatça paylaşılır' },
+  { id:12, cat:'Gelişim & Kariyer', text:'Çalışan gelişimine yatırım yapılır' },
+  { id:13, cat:'Bağlılık',          text:'Tekrar bu şirketi seçerim' },
+  { id:14, cat:'Bağlılık',          text:'Başkalarına tavsiye ederim' },
+  { id:15, cat:'Bağlılık',          text:'Gelecek açısından güvendeyim' },
+  { id:16, cat:'Yönetim',           text:'Yöneticim destek olur' },
+  { id:17, cat:'Yönetim',           text:'Yöneticim uygun üslupla konuşur' },
+  { id:18, cat:'Yönetim',           text:'Yöneticim eşit davranır' },
+  { id:19, cat:'Fiziksel Ortam',    text:'Yemek ve yemekhanelerden memnunum' },
+  { id:20, cat:'Fiziksel Ortam',    text:'Servis hizmetlerinden memnunum' },
+];
+
+let current = 0;
+let answers = {};
+
+async function startSurvey() {
+  try {
+    const r = await fetch('/api/check');
+    const d = await r.json();
+    if (d.submitted) {
+      document.getElementById('welcomeCard').innerHTML = `
+        <div class="done-banner">
+          <div class="emoji">✅</div>
+          <h3>Bu anketi daha önce doldurdunuz.</h3>
+          <p>Her cihazdan yalnızca bir yanıt alınmaktadır.</p>
+        </div>`;
+      return;
+    }
+  } catch(e) {}
+  showQuestion(0);
+}
+
+function showQuestion(idx) {
+  current = idx;
+  const q = QUESTIONS[idx];
+  document.getElementById('screenWelcome').classList.remove('active');
+  document.getElementById('screenQuestion').classList.add('active');
+  document.getElementById('progressWrap').style.display = 'block';
+
+  document.getElementById('qCategory').textContent = q.cat;
+  document.getElementById('qNumber').textContent = `Soru ${idx + 1} / ${QUESTIONS.length}`;
+  document.getElementById('qText').textContent = q.text;
+
+  const pct = Math.round((idx / QUESTIONS.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `Soru ${idx + 1} / ${QUESTIONS.length}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+
+  // Stars
+  const row = document.getElementById('starRow');
+  row.innerHTML = '';
+  for (let s = 1; s <= 5; s++) {
+    const btn = document.createElement('button');
+    btn.className = 'star-btn' + (answers[q.id] === s ? ' active' : '');
+    btn.textContent = '⭐';
+    btn.onclick = () => selectStar(s);
+    row.appendChild(btn);
+  }
+
+  document.getElementById('btnBack').style.display = idx === 0 ? 'none' : 'block';
+  updateNextBtn();
+}
+
+function selectStar(val) {
+  answers[QUESTIONS[current].id] = val;
+  const stars = document.querySelectorAll('.star-btn');
+  stars.forEach((s, i) => s.classList.toggle('active', i < val));
+  updateNextBtn();
+}
+
+function updateNextBtn() {
+  const btn = document.getElementById('btnNext');
+  const answered = !!answers[QUESTIONS[current].id];
+  btn.classList.toggle('ready', answered);
+  btn.textContent = current === QUESTIONS.length - 1 ? 'Gönder ✓' : 'İleri →';
+}
+
+function prevQuestion() {
+  if (current > 0) showQuestion(current - 1);
+}
+
+async function nextQuestion() {
+  if (!answers[QUESTIONS[current].id]) return;
+  if (current < QUESTIONS.length - 1) {
+    showQuestion(current + 1);
+    return;
+  }
+  // Submit
+  try {
+    const r = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers }),
+    });
+    if (r.ok) {
+      showDone();
+    } else {
+      const d = await r.json();
+      alert(d.error || 'Bir hata oluştu.');
+    }
+  } catch(e) {
+    alert('Bağlantı hatası. Lütfen tekrar deneyin.');
+  }
+}
+
+function showDone() {
+  document.getElementById('screenQuestion').classList.remove('active');
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('screenDone').classList.add('active');
+
+  const avg = Object.values(answers).reduce((a,b)=>a+b,0) / Object.values(answers).length;
+  const chips = document.getElementById('doneChips');
+  chips.innerHTML = `
+    <div class="chip">Ortalama Puanınız: ${avg.toFixed(1)} ⭐</div>
+    <div class="chip">${Object.keys(answers).length} soru yanıtlandı</div>
+  `;
+}
+</script>
+</body>
+</html>

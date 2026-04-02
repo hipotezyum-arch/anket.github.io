@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Anket Raporu — Admin</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --purple:#6B5CE7;--purple-light:#EDE9FF;
+    --teal:#00C9A7;--teal-light:#E0FBF5;
+    --red:#EF4444;--red-light:#FEE2E2;
+    --amber:#F59E0B;--amber-light:#FEF3C7;
+    --green:#10B981;--green-light:#D1FAE5;
+    --text:#1A1A2E;--muted:#6B7280;--border:#E5E7EB;--bg:#F6F5FF;--card:#fff;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
+  
+  /* LOGIN */
+  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;}
+  .login-card{background:var(--card);border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;box-shadow:0 4px 24px rgba(107,92,231,0.1);}
+  .login-card h2{font-size:1.3rem;margin-bottom:0.5rem;}
+  .login-card p{color:var(--muted);font-size:0.875rem;margin-bottom:1.5rem;}
+  .login-card input{width:100%;padding:0.85rem 1rem;border:1.5px solid var(--border);border-radius:12px;font-size:1rem;margin-bottom:1rem;outline:none;}
+  .login-card input:focus{border-color:var(--purple);}
+  .btn-login{width:100%;background:linear-gradient(135deg,#6B5CE7,#9B8DFF);color:#fff;border:none;border-radius:12px;padding:0.9rem;font-size:1rem;font-weight:600;cursor:pointer;}
+  .err{color:#EF4444;font-size:0.85rem;margin-top:0.5rem;}
+
+  /* DASHBOARD */
+  #dashboard{display:none;padding:1.5rem;max-width:900px;margin:0 auto;}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:gap;}
+  .page-header h1{font-size:1.4rem;font-weight:700;}
+  .btn-export{background:var(--purple);color:#fff;border:none;border-radius:10px;padding:0.6rem 1.2rem;font-size:0.875rem;font-weight:600;cursor:pointer;text-decoration:none;}
+
+  /* STATS CARDS */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem;}
+  .stat-card{background:var(--card);border-radius:16px;padding:1.1rem 1rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+  .stat-card .val{font-size:1.8rem;font-weight:700;color:var(--purple);}
+  .stat-card .lbl{font-size:0.78rem;color:var(--muted);margin-top:2px;}
+
+  /* CATEGORY BARS */
+  .section-title{font-size:1rem;font-weight:600;margin-bottom:0.75rem;margin-top:1.5rem;}
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem;}
+  @media(max-width:500px){.cat-grid{grid-template-columns:1fr;}}
+  .cat-card{background:var(--card);border-radius:14px;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+  .cat-name{font-size:0.8rem;font-weight:600;margin-bottom:0.5rem;}
+  .cat-bar-bg{height:8px;background:#F3F4F6;border-radius:99px;overflow:hidden;}
+  .cat-bar-fill{height:100%;border-radius:99px;transition:width 0.6s ease;}
+  .cat-score{font-size:0.78rem;color:var(--muted);margin-top:4px;}
+
+  /* QUESTION TABLE */
+  .q-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+  .q-table th{padding:0.75rem 1rem;text-align:left;font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;border-bottom:1px solid var(--border);}
+  .q-table td{padding:0.75rem 1rem;font-size:0.875rem;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
+  .q-table tr:last-child td{border-bottom:none;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:600;}
+  .badge-red{background:var(--red-light);color:#B91C1C;}
+  .badge-green{background:var(--green-light);color:#065F46;}
+  .badge-amber{background:var(--amber-light);color:#92400E;}
+  .mini-bar-wrap{display:flex;gap:2px;height:8px;width:80px;border-radius:4px;overflow:hidden;}
+  .mini-neg{background:#EF4444;}
+  .mini-neu{background:#F59E0B;}
+  .mini-pos{background:#10B981;}
+  .star-display{color:#F59E0B;font-size:0.85rem;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div style="font-size:2.5rem;margin-bottom:0.75rem">🔐</div>
+    <h2>Admin Paneli</h2>
+    <p>Anket sonuçlarını görüntülemek için giriş yapın.</p>
+    <input type="password" id="pwInput" placeholder="Şifre" onkeydown="if(event.key==='Enter')login()"/>
+    <button class="btn-login" onclick="login()">Giriş Yap</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="page-header">
+    <h1>📊 Anket Sonuçları</h1>
+    <a id="btnExport" class="btn-export" href="#">CSV İndir</a>
+  </div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="section-title">Kategori Ortalamaları</div>
+  <div class="cat-grid" id="catGrid"></div>
+
+  <div class="section-title">Soru Bazlı Detay</div>
+  <div style="overflow-x:auto">
+    <table class="q-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Soru</th>
+          <th>Ort.</th>
+          <th>Dağılım</th>
+          <th>Net Skor</th>
+          <th>Durum</th>
+        </tr>
+      </thead>
+      <tbody id="qTableBody"></tbody>
+    </table>
+  </div>
+  <p style="font-size:0.75rem;color:var(--muted);margin-top:0.75rem;text-align:right;" id="generatedAt"></p>
+</div>
+
+<script>
+let adminPw = '';
+
+function login() {
+  adminPw = document.getElementById('pwInput').value;
+  loadReport();
+}
+
+async function loadReport() {
+  try {
+    const r = await fetch('/api/report', { headers: { 'x-admin-password': adminPw } });
+    if (r.status === 401) { document.getElementById('loginErr').textContent = 'Şifre yanlış.'; return; }
+    const data = await r.json();
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('btnExport').href = '#';
+    document.getElementById('btnExport').onclick = () => exportCSV();
+    renderDashboard(data);
+  } catch(e) {
+    document.getElementById('loginErr').textContent = 'Bağlantı hatası.';
+  }
+}
+
+function exportCSV() {
+  const link = document.createElement('a');
+  link.href = '/api/export';
+  const headers = new Headers({ 'x-admin-password': adminPw });
+  fetch('/api/export', { headers }).then(r => r.blob()).then(blob => {
+    link.href = URL.createObjectURL(blob);
+    link.download = 'anket_sonuclari.csv';
+    link.click();
+  });
+}
+
+function renderDashboard(data) {
+  const total = data.total_participants;
+  const allAvg = data.questions.length
+    ? (data.questions.reduce((a,b) => a + (b.avg_score||0), 0) / data.questions.length).toFixed(2)
+    : 0;
+  const criticals = data.questions.filter(q => q.avg_score < 2.5).length;
+  const strengths = data.questions.filter(q => q.avg_score >= 3.5).length;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="val">${total}</div><div class="lbl">Katılımcı</div></div>
+    <div class="stat-card"><div class="val">${allAvg}</div><div class="lbl">Genel Ort.</div></div>
+    <div class="stat-card"><div class="val">${criticals}</div><div class="lbl">Kritik Alan</div></div>
+    <div class="stat-card"><div class="val">${strengths}</div><div class="lbl">Güçlü Alan</div></div>
+  `;
+
+  // Categories
+  const catHtml = data.categories.map(c => {
+    const pct = (c.avg / 5) * 100;
+    const color = c.avg < 2.5 ? '#EF4444' : c.avg < 3.5 ? '#F59E0B' : '#10B981';
+    return `<div class="cat-card">
+      <div class="cat-name">${c.category}</div>
+      <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="cat-score">${c.avg.toFixed(2)} / 5.00</div>
+    </div>`;
+  }).join('');
+  document.getElementById('catGrid').innerHTML = catHtml;
+
+  // Table
+  const rows = data.questions.map(q => {
+    const stars = '⭐'.repeat(Math.round(q.avg_score || 0));
+    const net = q.net_score;
+    const status = q.avg_score >= 3.5
+      ? '<span class="badge badge-green">Güçlü</span>'
+      : q.avg_score < 2.5
+        ? '<span class="badge badge-red">Kritik</span>'
+        : '<span class="badge badge-amber">Sınırda</span>';
+    const netColor = net > 0 ? '#10B981' : net < -20 ? '#EF4444' : '#F59E0B';
+    return `<tr>
+      <td style="color:var(--muted);font-size:0.8rem">${q.question_id}</td>
+      <td><strong style="font-size:0.82rem">${q.text}</strong><br><span style="font-size:0.72rem;color:var(--muted)">${q.category}</span></td>
+      <td><span class="star-display">${(q.avg_score||0).toFixed(1)}</span></td>
+      <td>
+        <div class="mini-bar-wrap">
+          <div class="mini-neg" style="width:${q.negative_pct||0}%"></div>
+          <div class="mini-neu" style="width:${q.neutral_pct||0}%"></div>
+          <div class="mini-pos" style="width:${q.positive_pct||0}%"></div>
+        </div>
+      </td>
+      <td style="color:${netColor};font-weight:600">${net > 0 ? '+' : ''}${net}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('qTableBody').innerHTML = rows;
+  document.getElementById('generatedAt').textContent = 'Oluşturuldu: ' + new Date(data.generated_at).toLocaleString('tr-TR');
+}
+</script>
+</body>
+</html>
